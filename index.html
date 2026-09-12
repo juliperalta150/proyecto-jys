@@ -253,65 +253,131 @@
         }
 
         @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+            }
 
-            .inicio,
+            section {
+                padding: 20px 15px;
+            }
+
+            .inicio {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+                margin-top: 0;
+            }
+
+            .inicio-texto {
+                width: 100%;
+                padding: 0;
+                margin-bottom: 20px;
+            }
+
+            .inicio-texto h1 {
+                font-size: 32px;
+            }
+
+            .inicio-imagenes {
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .inicio-imagenes img {
+                width: 50%;
+                height: 150px;
+                object-fit: cover;
+                margin: 0;
+            }
+
+            .buscador {
+                position: sticky;
+                top: 62px;
+                z-index: 999;
+                margin-bottom: 10px;
+                background-color: var(--fondo);
+            }
+
             .catalogo-container {
                 flex-direction: column;
+                gap: 10px;
             }
 
             .menu-lateral {
                 width: 100%;
+                position: sticky;
+                top: 112px;
+                z-index: 998;
+                background-color: var(--fondo);
+                padding: 10px 0;
+                margin-top: -10px;
             }
 
             .menu-lateral ul {
                 display: flex;
                 overflow-x: auto;
                 position: static;
-                padding-bottom: 10px;
+                padding-bottom: 5px;
             }
 
             .menu-lateral li {
                 white-space: nowrap;
                 margin-right: 10px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .inicio {
-                flex-direction: column;
-                text-align: center;
-                padding: 20px 15px;
+                padding: 8px 15px;
+                font-size: 14px;
             }
 
-            .inicio-texto {
+            .grilla-productos {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .tarjeta-producto {
+                display: grid;
+                grid-template-columns: 110px 1fr;
+                grid-template-rows: auto auto 1fr;
+                gap: 5px 15px;
+                text-align: left;
+                padding: 12px;
+                align-items: start;
+            }
+
+            .tarjeta-producto img {
+                grid-column: 1 / 2;
+                grid-row: 1 / 4;
                 width: 100%;
-                padding: 0;
-                margin-bottom: 30px;
+                height: 110px;
+                margin-bottom: 0;
+                object-fit: contain;
+                background-color: #fdfdfd;
             }
 
-            .inicio-imagenes {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 20px;
-            }
-
-            .inicio-imagenes img {
-                width: 100%;
-                max-width: 350px;
-                height: auto;
-                object-fit: cover;
+            .tarjeta-producto h3 {
+                grid-column: 2 / 3;
+                grid-row: 1 / 2;
                 margin: 0;
+                font-size: 15px;
+                padding-top: 5px;
             }
 
-            .catalogo-container {
-                min-height: auto;
-                padding-bottom: 30px;
+            .precio {
+                grid-column: 2 / 3;
+                grid-row: 2 / 3;
+                margin: 5px 0;
+                font-size: 18px;
             }
 
-            .sucursal {
-                margin-top: 20px;
+            .btn-whatsapp {
+                grid-column: 2 / 3;
+                grid-row: 3 / 4;
+                width: max-content;
+                padding: 8px 15px;
+                font-size: 13px;
+                margin: 0;
             }
         }
     </style>
@@ -380,8 +446,9 @@
             <div class="tarjeta-info">
                 <h3>💬 Consultas</h3>
                 <p>Contactanos para confirmar stock o encargar tus pedidos.</p>
-                <a href="https://wa.me/5493524499415" target="_blank" class="btn-whatsapp"
-                    style="margin-top: 10px;">Escribir ahora</a>
+                <a href="https://wa.me/5493524494201" target="_blank" class="btn-whatsapp"
+                    style="margin-top: 10px; margin-bottom: 10px;">Escribir al 3524494201</a>
+                <a href="https://wa.me/5493524499415" target="_blank" class="btn-whatsapp">Escribir al 3524499415</a>
             </div>
         </div>
     </section>
@@ -391,10 +458,15 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVsd21mdmJ6ZGdod3drcGtjbXRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2NDA0MDEsImV4cCI6MjEwNDIxNjQwMX0.0CzUFM4IZYoQk8O-V8Vv9-8DOGSPKeCno6_HnBz4zek';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const numeroWhatsApp = "5493524499415";
+        const numeroWhatsApp = "5493524494201";
+        window.categoriaActiva = 'todos';
 
         async function cargarCatalogo() {
             try {
+                // Consultar si debemos mostrar u ocultar los precios
+                const { data: configData } = await supabaseClient.from('productos').select('*').eq('Nombre', 'CONFIG_PRECIOS').limit(1);
+                const mostrarPrecios = (configData && configData.length > 0) ? String(configData[0].Precio) === '1' : true;
+
                 const { data: productos, error } = await supabaseClient
                     .from('productos')
                     .select('*')
@@ -402,26 +474,36 @@
 
                 if (error) throw error;
 
+                // Ordenar productos por categoría alfabéticamente
+                productos.sort((a, b) => (a.Categoria || '').trim().localeCompare((b.Categoria || '').trim()));
+
                 const grilla = document.getElementById('grilla-productos');
                 const menu = document.getElementById('filtro-categorias');
                 grilla.innerHTML = '';
                 let categorias = new Set();
 
                 productos.forEach(prod => {
+                    if (prod.Nombre === 'CONFIG_PRECIOS') return; // Ignorar el registro de configuración
+
                     const cat = (prod.Categoria || '').trim().toLowerCase();
                     const nom = (prod.Nombre || '').trim();
                     // Limpiar caracteres extraños del precio y formatear
                     const prec = Number(String(prod.Precio).replace(/\D/g, '')).toLocaleString('es-AR');
                     const img = (prod.Imagen || '').trim();
 
-                    if (cat) categorias.add(cat);
+                    if (cat && cat !== 'config') categorias.add(cat);
 
-                    const msg = encodeURIComponent(`Hola! Me interesa: ${nom} ($${prec}). ¿Tienen stock?`);
+                    const precioHTML = mostrarPrecios ? `<div class="precio">$${prec}</div>` : '';
+                    const msgTexto = mostrarPrecios 
+                        ? `Hola! Me interesa: ${nom} ($${prec}). ¿Tienen stock?`
+                        : `Hola! Me interesa: ${nom}. ¿Tienen stock y qué precio tiene?`;
+                    const msg = encodeURIComponent(msgTexto);
+
                     grilla.innerHTML += `
                     <div class="tarjeta-producto" data-categoria="${cat}">
                         <img src="${img}" alt="${nom}" onerror="this.src='https://via.placeholder.com/500?text=Sin+Foto'">
                         <h3 class="titulo-producto">${nom}</h3>
-                        <div class="precio">$${prec}</div>
+                        ${precioHTML}
                         <a href="https://wa.me/${numeroWhatsApp}?text=${msg}" target="_blank" class="btn-whatsapp">Pedir</a>
                     </div>`;
                 });
@@ -449,10 +531,58 @@
                 btns.forEach(x => x.classList.remove('activo'));
                 b.classList.add('activo');
                 const cat = b.getAttribute('data-cat');
+                window.categoriaActiva = cat; // Guardar estado actual
+
                 document.querySelectorAll('.tarjeta-producto').forEach(p => {
                     p.style.display = (cat === 'todos' || p.getAttribute('data-categoria') === cat) ? 'block' : 'none';
                 });
+
+                // Scroll suave al catálogo al cambiar de categoría
+                const catalogo = document.getElementById('catalogo');
+                const header = document.querySelector('header');
+                const headerHeight = header ? header.offsetHeight : 60;
+                const topPos = catalogo.getBoundingClientRect().top + window.scrollY - headerHeight;
+                window.scrollTo({ top: topPos, behavior: 'smooth' });
             }));
+
+            // Scroll spy para cambiar la categoría activa en el menú al hacer scroll
+            window.addEventListener('scroll', () => {
+                if (window.categoriaActiva !== 'todos') return;
+
+                const headerHeight = document.querySelector('header') ? document.querySelector('header').offsetHeight : 60;
+                const buscadorHeight = document.querySelector('.buscador') ? document.querySelector('.buscador').offsetHeight : 50;
+                const offset = headerHeight + buscadorHeight + 20;
+
+                let currentCat = 'todos';
+                const tarjetas = document.querySelectorAll('.tarjeta-producto');
+                
+                for (let i = 0; i < tarjetas.length; i++) {
+                    const rect = tarjetas[i].getBoundingClientRect();
+                    if (rect.bottom >= offset + 50) {
+                        currentCat = tarjetas[i].getAttribute('data-categoria');
+                        break;
+                    }
+                }
+
+                const rectCat = document.getElementById('catalogo').getBoundingClientRect();
+                if (rectCat.top > offset - 50) {
+                    currentCat = 'todos';
+                }
+
+                if (currentCat) {
+                    const btns = document.querySelectorAll('#filtro-categorias li');
+                    btns.forEach(x => x.classList.remove('activo'));
+                    const activeBtn = document.querySelector(`#filtro-categorias li[data-cat="${currentCat}"]`);
+                    if (activeBtn) {
+                        activeBtn.classList.add('activo');
+                        const menu = document.querySelector('.menu-lateral ul');
+                        if (menu && window.innerWidth <= 768) {
+                            const scrollLeft = activeBtn.offsetLeft - menu.offsetWidth / 2 + activeBtn.offsetWidth / 2;
+                            menu.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+                        }
+                    }
+                }
+            });
         }
 
         cargarCatalogo();

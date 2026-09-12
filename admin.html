@@ -114,7 +114,9 @@
                                 <th style="text-align: left; border-bottom: 1px solid #ddd; padding: 8px;">Detalle</th>
                                 <th style="text-align: left; border-bottom: 1px solid #ddd; padding: 8px;">Movimiento
                                 </th>
-                                <th style="text-align: center; border-bottom: 1px solid #ddd; padding: 8px; width: 80px;">Acción</th>
+                                <th
+                                    style="text-align: center; border-bottom: 1px solid #ddd; padding: 8px; width: 80px;">
+                                    Acción</th>
                             </tr>
                         </thead>
                         <tbody id="listaMovimientos">
@@ -563,7 +565,14 @@
 
             <!-- PANEL LISTADO DE PRODUCTOS EN SUPABASE -->
             <div class="panel">
-                <h2>📋 Gestión de Productos</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">📋 Gestión de Productos</h2>
+                    <button id="btnTogglePrecios" class="btn-accion"
+                        style="background: #17a2b8; color: white; border: none; border-radius: 8px; padding: 8px 15px; cursor: pointer;"
+                        onclick="toggleMostrarPrecios()">
+                        👁️ Cargando estado...
+                    </button>
+                </div>
                 <input type="text" id="buscadorProductos" class="input-estandar"
                     placeholder="🔍 Buscar producto por nombre..." style="margin-bottom: 15px;">
                 <div class="tabla-contenedor">
@@ -958,6 +967,69 @@
         // 4. LÓGICA DE TABLA Y MODAL DE EDICIÓN
         // -------------------------------------------------------------------
         let idOriginalEnEdicion = null;
+        let configPreciosId = null;
+        let preciosVisibles = true;
+
+        window.cargarEstadoPrecios = async function () {
+            const { data, error } = await supabaseClient.from('productos').select('*').eq('Nombre', 'CONFIG_PRECIOS').limit(1);
+            const btn = document.getElementById('btnTogglePrecios');
+
+            if (data && data.length > 0) {
+                const configRow = data[0];
+                configPreciosId = configRow.id;
+                preciosVisibles = String(configRow.Precio) === '1';
+
+                if (configRow.Visible === 'no') {
+                    await supabaseClient.from('productos').update({ Visible: 'si' }).eq('id', configPreciosId);
+                }
+            } else {
+                // No existe, crearlo
+                const { data: insertData, error: insertError } = await supabaseClient.from('productos').insert([{
+                    Nombre: 'CONFIG_PRECIOS',
+                    Precio: '1',
+                    Categoria: 'CONFIG',
+                    Visible: 'si',
+                    Imagen: ''
+                }]).select().limit(1);
+                if (!insertError && insertData && insertData.length > 0) {
+                    configPreciosId = insertData[0].id;
+                    preciosVisibles = true;
+                }
+            }
+
+            actualizarBotonPrecios(btn);
+        }
+
+        function actualizarBotonPrecios(btn) {
+            if (preciosVisibles) {
+                btn.innerHTML = '👁️ Ocultar Precios en Catálogo';
+                btn.style.background = '#dc3545';
+            } else {
+                btn.innerHTML = '👁️ Mostrar Precios en Catálogo';
+                btn.style.background = '#28a745';
+            }
+        }
+
+        window.toggleMostrarPrecios = async function () {
+            if (!configPreciosId) return alert('Configuración no inicializada. Esperá unos segundos.');
+
+            const btn = document.getElementById('btnTogglePrecios');
+            btn.innerHTML = '⏳ Actualizando...';
+            btn.disabled = true;
+
+            const nuevoEstado = !preciosVisibles;
+            const nuevoPrecio = nuevoEstado ? '1' : '0';
+
+            const { error } = await supabaseClient.from('productos').update({ Precio: nuevoPrecio }).eq('id', configPreciosId);
+
+            if (error) {
+                alert('Error al actualizar configuración.');
+            } else {
+                preciosVisibles = nuevoEstado;
+                actualizarBotonPrecios(btn);
+            }
+            btn.disabled = false;
+        }
 
         async function cargarListaProductos() {
             const tbody = document.getElementById('listaProductos');
@@ -977,8 +1049,11 @@
                 return;
             }
 
+            if (configPreciosId === null) cargarEstadoPrecios();
+
             let filasHTML = '';
             productos.forEach(prod => {
+                if (prod.Nombre === 'CONFIG_PRECIOS') return; // Ocultar fila de configuración
                 const colorVisible = (prod.Visible || '').toLowerCase() === 'si' ? '#28a745' : '#dc3545';
                 const visibleText = (prod.Visible || '').toUpperCase();
                 filasHTML += `
