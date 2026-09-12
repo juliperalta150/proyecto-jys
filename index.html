@@ -464,7 +464,7 @@
         async function cargarCatalogo() {
             try {
                 // Consultar si debemos mostrar u ocultar los precios
-                const { data: configData } = await supabaseClient.from('productos').select('*').eq('Nombre', 'CONFIG_PRECIOS').limit(1);
+                const { data: configData } = await supabaseClient.from('productos').select('*').eq('Nombre', 'CONFIG_PRECIOS').order('id', { ascending: true }).limit(1);
                 const mostrarPrecios = (configData && configData.length > 0) ? String(configData[0].Precio) === '1' : true;
 
                 const { data: productos, error } = await supabaseClient
@@ -494,7 +494,7 @@
                     if (cat && cat !== 'config') categorias.add(cat);
 
                     const precioHTML = mostrarPrecios ? `<div class="precio">$${prec}</div>` : '';
-                    const msgTexto = mostrarPrecios 
+                    const msgTexto = mostrarPrecios
                         ? `Hola! Me interesa: ${nom} ($${prec}). ¿Tienen stock?`
                         : `Hola! Me interesa: ${nom}. ¿Tienen stock y qué precio tiene?`;
                     const msg = encodeURIComponent(msgTexto);
@@ -555,7 +555,7 @@
 
                 let currentCat = 'todos';
                 const tarjetas = document.querySelectorAll('.tarjeta-producto');
-                
+
                 for (let i = 0; i < tarjetas.length; i++) {
                     const rect = tarjetas[i].getBoundingClientRect();
                     if (rect.bottom >= offset + 50) {
