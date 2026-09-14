@@ -67,27 +67,54 @@
                 <form id="formNuevoCargo"
                     style="display: none; background: #fff5f5; padding: 15px; border-radius: 8px; border: 1px solid #ffcdd2; margin-bottom: 20px;">
                     <h4 style="margin-top:0; color: #dc3545;">Añadir Deuda (Fiado)</h4>
-                    <div class="input-group" style="position: relative;">
-                        <label>Concepto (Producto o carga manual)</label>
-                        <input type="text" id="buscadorProductosCargo" class="input-estandar"
-                            placeholder="Busca un producto o escribe manualmente..." autocomplete="off" required>
 
-                        <div id="listaProductosCargo"
-                            style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; margin-top: 5px; display: none; background: #fff; position: absolute; width: 100%; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-
+                    <div
+                        style="background: white; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 15px;">
+                        <h5 style="margin-top: 0; margin-bottom: 10px;">1. Agregar Concepto</h5>
+                        <div class="input-group" style="position: relative; margin-bottom: 10px;">
+                            <label>Buscar Producto o Descripción Manual</label>
+                            <input type="text" id="buscadorProductosCargo" class="input-estandar"
+                                placeholder="Busca un producto o escribe manualmente..." autocomplete="off">
+                            <div id="listaProductosCargo"
+                                style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; margin-top: 5px; display: none; background: #fff; position: absolute; width: 100%; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <div class="input-group" style="flex: 1;">
+                                <label>Precio Unit.</label>
+                                <input type="number" id="cargoMontoTemp" class="input-estandar" placeholder="Ej: 1500">
+                            </div>
+                            <div class="input-group" style="flex: 1;">
+                                <label>Cantidad</label>
+                                <input type="number" id="cargoCantidadTemp" class="input-estandar" value="1" min="1">
+                            </div>
+                            <div style="display: flex; align-items: flex-end;">
+                                <button type="button" class="boton-foto"
+                                    style="background: #28a745; padding: 10px 15px; margin-bottom: 15px;"
+                                    onclick="agregarItemCargo()">Añadir</button>
+                            </div>
                         </div>
                     </div>
+
+                    <h5 style="margin-top: 0; margin-bottom: 10px;">2. Detalle de la Deuda</h5>
+                    <div id="listaItemsCargo"
+                        style="background: white; border: 1px solid #ddd; border-radius: 8px; min-height: 50px; padding: 10px; margin-bottom: 15px;">
+                        <div style="text-align: center; color: #666; font-style: italic; font-size: 14px;">No hay ítems
+                            agregados</div>
+                    </div>
+
                     <div class="input-group">
-                        <label>Comentario adicional (Opcional)</label>
+                        <label>Comentario global (Opcional)</label>
                         <input type="text" id="cargoComentario" class="input-estandar"
                             placeholder="Ej: Retirado por el hijo">
                     </div>
-                    <div class="input-group">
-                        <label>Monto a sumar</label>
-                        <input type="number" id="cargoMonto" class="input-estandar" required>
+
+                    <div style="text-align: right; font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+                        Total a fiar: <span id="cargoMontoTotalDisplay">$0</span>
                     </div>
+
                     <button type="submit" class="boton-foto" id="btnGuardarCargo"
-                        style="background: #dc3545; margin-top: 10px;">Guardar Deuda</button>
+                        style="background: #dc3545; margin-top: 10px; width: 100%;">Guardar Deuda</button>
                 </form>
 
                 <form id="formNuevoPago"
@@ -1240,7 +1267,7 @@
                 <tr>
                     <td><img src="${prod.Imagen}" width="50" height="50" style="object-fit: cover; border-radius: 5px;"></td>
                     <td style="font-weight: 500;">${prod.Nombre}</td>
-                    <td>$${prod.Precio}</td>
+                    <td>$${Number(prod.Precio).toLocaleString('es-AR')}</td>
                     <td style="text-transform: capitalize;">${prod.Categoria}</td>
                     <td>${prod.stock !== undefined && prod.stock !== null ? prod.stock : 0}</td>
                     <td><span class="badge" style="background: ${colorVisible}">${visibleText}</span></td>
@@ -1390,7 +1417,7 @@
 
             clientesFiltrados.forEach(c => {
                 const colorSaldo = c.saldo_actual > 0 ? '#dc3545' : '#28a745';
-                const textoSaldo = c.saldo_actual > 0 ? `DEBE: $${c.saldo_actual}` : `AL DÍA: $0`;
+                const textoSaldo = c.saldo_actual > 0 ? `DEBE: $${Number(c.saldo_actual).toLocaleString('es-AR')}` : `AL DÍA: $0`;
 
                 tbody.innerHTML += `
                 <tr>
@@ -1503,7 +1530,7 @@
 
         function actualizarVistaSaldo(saldo) {
             const el = document.getElementById('historialSaldoCliente');
-            el.textContent = saldo > 0 ? `DEUDA TOTAL: $${saldo}` : `AL DÍA: $0`;
+            el.textContent = saldo > 0 ? `DEUDA TOTAL: $${Number(saldo).toLocaleString('es-AR')}` : `AL DÍA: $0`;
             el.style.color = saldo > 0 ? '#dc3545' : '#28a745';
         }
 
@@ -1536,7 +1563,7 @@
                 <tr>
                     <td style="font-size:12px; color:#666; vertical-align: middle;">${fecha}</td>
                     <td style="vertical-align: middle;">${m.detalle}</td>
-                    <td style="color:${color}; font-weight:bold; vertical-align: middle;">${signo}$${m.monto}</td>
+                    <td style="color:${color}; font-weight:bold; vertical-align: middle;">${signo}$${Number(m.monto).toLocaleString('es-AR')}</td>
                     <td style="text-align: center; vertical-align: middle;">
                         <button class="boton-foto" style="padding: 2px 6px; font-size: 10px; background: #dc3545; width: auto; min-height: 24px; margin: 0 auto;" onclick="eliminarMovimiento('${m.id}', '${m.tipo}', ${m.monto})">❌</button>
                     </td>
@@ -1548,14 +1575,42 @@
         window.eliminarMovimiento = async function (movimientoId, tipo, monto) {
             if (!confirm("¿Estás seguro de que deseas eliminar este movimiento? El saldo del cliente se recalculará automáticamente.")) return;
 
+            // 0. Obtener el movimiento para leer el detalle
+            const { data: mov } = await supabaseClient.from('movimientos_deuda').select('detalle').eq('id', movimientoId).single();
+            const detalleStr = mov ? mov.detalle : '';
+
             // 1. Obtener saldo actual más reciente
             const { data: cliente } = await supabaseClient.from('clientes').select('saldo_actual').eq('id', clienteActivoId).single();
             let nuevoSaldo = parseFloat(cliente.saldo_actual);
 
             // 2. Operación inversa para revertir el impacto
-            // Si eliminamos una deuda (cargo), el saldo baja. Si eliminamos un pago, el saldo sube.
-            if (tipo === 'cargo') nuevoSaldo -= monto;
-            else if (tipo === 'pago') nuevoSaldo += monto;
+            if (tipo === 'cargo') {
+                nuevoSaldo -= monto;
+                // Devolver stock si es cargo y tiene un detalle válido
+                if (detalleStr) {
+                    // Remover comentario opcional al final, ej. "(Retirado por hijo)"
+                    const sinComentario = detalleStr.replace(/\s*\([^)]*\)$/, '').trim();
+                    const items = sinComentario.split(', ');
+                    for (const itemStr of items) {
+                        const match = itemStr.match(/^(\d+)x\s+(.+)$/);
+                        if (match) {
+                            const cantidad = parseInt(match[1]);
+                            const nombreProd = match[2];
+
+                            // Buscar producto por nombre
+                            const { data: prod } = await supabaseClient.from('productos').select('id, stock').eq('Nombre', nombreProd).single();
+                            if (prod && prod.stock !== null) {
+                                const nuevoStock = (prod.stock || 0) + cantidad;
+                                await supabaseClient.from('productos').update({ stock: nuevoStock }).eq('id', prod.id);
+                            }
+                        }
+                    }
+                    if (typeof cargarListaProductos === 'function') cargarListaProductos();
+                }
+            }
+            else if (tipo === 'pago') {
+                nuevoSaldo += monto;
+            }
 
             // 3. Eliminar movimiento de la BD
             const { error: errDel } = await supabaseClient.from('movimientos_deuda').delete().eq('id', movimientoId);
@@ -1607,14 +1662,15 @@
                     <img src="${p.Imagen}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc;">
                     <div style="flex: 1;">
                         <div style="font-weight: bold; font-size: 14px;">${p.Nombre}</div>
-                        <div style="color: #28a745; font-size: 13px;">$${p.Precio}</div>
+                        <div style="color: #28a745; font-size: 13px;">$${Number(p.Precio).toLocaleString('es-AR')}</div>
                     </div>
                 `;
 
                 // Al hacer clic, llenamos los campos y cerramos el buscador
                 item.addEventListener('click', () => {
                     document.getElementById('buscadorProductosCargo').value = p.Nombre;
-                    document.getElementById('cargoMonto').value = p.Precio;
+                    document.getElementById('cargoMontoTemp').value = p.Precio;
+                    productoSeleccionadoTemporal = p;
                     contenedor.style.display = 'none';
                 });
 
@@ -1632,6 +1688,7 @@
 
         inputBuscadorCargo.addEventListener('input', (e) => {
             listaResultadosCargo.style.display = 'block';
+            productoSeleccionadoTemporal = null; // Reset si cambian el texto
             renderizarListaProductosCargo(e.target.value);
         });
 
@@ -1642,9 +1699,84 @@
             }
         });
 
+        let itemsCargo = [];
+        let productoSeleccionadoTemporal = null;
+
+        window.agregarItemCargo = function () {
+            const descripcion = document.getElementById('buscadorProductosCargo').value.trim();
+            const precio = parseFloat(document.getElementById('cargoMontoTemp').value);
+            const cantidad = parseInt(document.getElementById('cargoCantidadTemp').value) || 1;
+
+            if (!descripcion || isNaN(precio) || precio <= 0) {
+                alert("Por favor, ingresa un concepto y un precio válido.");
+                return;
+            }
+
+            // Si es un producto del sistema y no fue alterado el nombre
+            let idProd = null;
+            if (productoSeleccionadoTemporal && productoSeleccionadoTemporal.Nombre === descripcion) {
+                idProd = productoSeleccionadoTemporal.id;
+            }
+
+            itemsCargo.push({
+                id: idProd, // Puede ser null si es carga manual
+                nombre: descripcion,
+                precio: precio,
+                cantidad: cantidad,
+                subtotal: precio * cantidad
+            });
+
+            // Limpiar inputs
+            document.getElementById('buscadorProductosCargo').value = '';
+            document.getElementById('cargoMontoTemp').value = '';
+            document.getElementById('cargoCantidadTemp').value = '1';
+            productoSeleccionadoTemporal = null;
+
+            renderizarItemsCargo();
+        }
+
+        function renderizarItemsCargo() {
+            const contenedor = document.getElementById('listaItemsCargo');
+            const totalDisplay = document.getElementById('cargoMontoTotalDisplay');
+
+            if (itemsCargo.length === 0) {
+                contenedor.innerHTML = '<div style="text-align: center; color: #666; font-style: italic; font-size: 14px;">No hay ítems agregados</div>';
+                totalDisplay.textContent = '$0';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+            itemsCargo.forEach((item, index) => {
+                total += item.subtotal;
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 5px 0;">
+                        <div>
+                            <strong>${item.nombre}</strong><br>
+                            <span style="font-size: 12px; color: #666;">$${Number(item.precio).toLocaleString('es-AR')} x ${item.cantidad}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <strong>$${Number(item.subtotal).toLocaleString('es-AR')}</strong>
+                            <button type="button" style="background: transparent; color: #dc3545; border: none; cursor: pointer; font-size: 16px;" onclick="eliminarItemCargo(${index})">❌</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            contenedor.innerHTML = html;
+            totalDisplay.textContent = '$' + Number(total).toLocaleString('es-AR');
+        }
+
+        window.eliminarItemCargo = function (index) {
+            itemsCargo.splice(index, 1);
+            renderizarItemsCargo();
+        }
+
         window.mostrarFormCargo = function () {
             document.getElementById('formNuevoCargo').style.display = 'block';
             document.getElementById('formNuevoPago').style.display = 'none';
+            itemsCargo = [];
+            renderizarItemsCargo();
         }
         window.mostrarFormPago = function () {
             document.getElementById('formNuevoPago').style.display = 'block';
@@ -1653,15 +1785,30 @@
 
         document.getElementById('formNuevoCargo').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (itemsCargo.length === 0) {
+                alert("Debes agregar al menos un ítem a la lista de deuda.");
+                return;
+            }
+
             const btn = document.getElementById('btnGuardarCargo');
             btn.disabled = true;
-            const monto = parseFloat(document.getElementById('cargoMonto').value);
 
-            const concepto = document.getElementById('buscadorProductosCargo').value.trim();
             const comentario = document.getElementById('cargoComentario').value.trim();
-            const detalle = comentario ? `${concepto} (${comentario})` : concepto;
 
-            await registrarMovimiento('cargo', monto, detalle);
+            let montoTotal = 0;
+            let detallesItems = [];
+            itemsCargo.forEach(item => {
+                montoTotal += item.subtotal;
+                detallesItems.push(`${item.cantidad}x ${item.nombre}`);
+            });
+
+            let detalleStr = detallesItems.join(', ');
+            if (comentario) detalleStr += ` (${comentario})`;
+
+            await registrarMovimiento('cargo', montoTotal, detalleStr, itemsCargo);
+
+            itemsCargo = [];
+            renderizarItemsCargo();
             btn.disabled = false;
         });
 
@@ -1680,18 +1827,55 @@
             }
 
             btn.disabled = true;
-            const detalle = document.getElementById('pagoDetalle').value || 'Pago a cuenta';
+            let detalle = document.getElementById('pagoDetalle').value || 'Pago a cuenta';
+
+            // Si es un pago y queremos que aparezca en el historial, preparamos la aclaración
+            const aclaracion = monto < saldoTotal ? 'Pago Parcial de Cuenta' : 'Pago Total de Cuenta';
+            detalle = `${aclaracion} - ${clienteActivoNombre} (${detalle})`;
+
             await registrarMovimiento('pago', monto, detalle);
             btn.disabled = false;
         });
 
-        async function registrarMovimiento(tipo, monto, detalle) {
+        async function registrarMovimiento(tipo, monto, detalle, listaItems = null) {
             // 1. Obtener saldo actual más reciente por si hubo cambios
             const { data: cliente } = await supabaseClient.from('clientes').select('saldo_actual').eq('id', clienteActivoId).single();
             let nuevoSaldo = parseFloat(cliente.saldo_actual);
 
-            if (tipo === 'cargo') nuevoSaldo += monto;
-            else if (tipo === 'pago') nuevoSaldo -= monto;
+            if (tipo === 'cargo') {
+                nuevoSaldo += monto;
+                // Descontar stock si hay lista de items
+                if (listaItems && listaItems.length > 0) {
+                    for (const item of listaItems) {
+                        if (item.id) { // Solo si es un producto registrado
+                            const { data: prod } = await supabaseClient.from('productos').select('stock').eq('id', item.id).single();
+                            if (prod && prod.stock !== null) {
+                                const nuevoStock = (prod.stock || 0) - item.cantidad;
+                                await supabaseClient.from('productos').update({ stock: nuevoStock }).eq('id', item.id);
+                            }
+                        }
+                    }
+                    if (typeof cargarListaProductos === 'function') cargarListaProductos();
+                }
+            }
+            else if (tipo === 'pago') {
+                nuevoSaldo -= monto;
+                // Registrar el pago como venta para que aparezca en el historial
+                // Creamos un detalle compatible con el historial de ventas
+                const detalleVenta = [{
+                    id: 'pago-' + Date.now(),
+                    nombre: detalle, // Acá viene "Pago Parcial/Total de Cuenta - Nombre..."
+                    cantidad: 1,
+                    precio: monto,
+                    imagen: '',
+                    cliente_id: clienteActivoId
+                }];
+                await supabaseClient.from('ventas').insert([{
+                    total: monto,
+                    detalle: detalleVenta
+                }]);
+                if (typeof cargarHistorialVentas === 'function') cargarHistorialVentas(); // Refrescar ventas si está cargado
+            }
 
             // 2. Insertar movimiento
             await supabaseClient.from('movimientos_deuda').insert([{ cliente_id: clienteActivoId, tipo, monto, detalle }]);
@@ -1759,11 +1943,13 @@
 
                 html += `
                 <tr>
-                    <td style="font-weight: 500; padding: 15px; display: flex; align-items: center; gap: 10px;">
-                        <img src="${prod.Imagen}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc;">
-                        ${prod.Nombre}
+                    <td style="font-weight: 500; padding: 15px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="${prod.Imagen}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc;">
+                            ${prod.Nombre}
+                        </div>
                     </td>
-                    <td style="padding: 15px;">$${prod.Precio}</td>
+                    <td style="padding: 15px;">$${Number(prod.Precio).toLocaleString('es-AR')}</td>
                     <td style="font-weight: bold; color: ${stockRestante > 0 ? '#28a745' : '#dc3545'}; padding: 15px;">${stockRestante}</td>
                     <td style="text-align: center; padding: 10px;">
                         <button class="boton-foto" style="padding: 10px 15px; font-size: 16px; width: 100%; background: ${colorBtn}; color: white; border-radius: 8px; font-weight: bold;" onclick="agregarAlCarrito('${prod.id}')" ${deshabilitado}>➕ Agregar</button>
@@ -1876,7 +2062,7 @@
                             <img src="${item.imagen}" width="60" height="60" style="object-fit: cover; border-radius: 8px;">
                             <div>
                                 <div style="font-weight: bold; font-size: 18px;">${item.nombre}</div>
-                                <div style="color: #666; font-size: 16px;">$${item.precio} x ${item.cantidad} = <strong style="font-size: 18px;">$${subtotal}</strong></div>
+                                <div style="color: #666; font-size: 16px;">$${Number(item.precio).toLocaleString('es-AR')} x ${item.cantidad} = <strong style="font-size: 18px;">$${Number(subtotal).toLocaleString('es-AR')}</strong></div>
                             </div>
                         </div>
                         <div style="display: flex; gap: 10px;">
@@ -1887,12 +2073,12 @@
                 `;
             });
             contenedor.innerHTML = html;
-            elTotal.textContent = '$' + total;
+            elTotal.textContent = '$' + Number(total).toLocaleString('es-AR');
             btnConfirmar.style.display = 'block';
             if (btnAnular) btnAnular.style.display = 'block';
         }
 
-        window.agregarCajaDesdeId = function(id) {
+        window.agregarCajaDesdeId = function (id) {
             let prod = productosCaja.find(p => String(p.id) === String(id));
             if (!prod) prod = inventario.find(p => String(p.id) === String(id));
             if (!prod) return;
@@ -1921,7 +2107,7 @@
             if (typeof renderizarListaCaja === 'function') renderizarListaCaja();
         }
 
-        window.quitarDeCaja = function(id) {
+        window.quitarDeCaja = function (id) {
             const idx = carritoCaja.findIndex(item => String(item.id) === String(id));
             if (idx >= 0) {
                 carritoCaja[idx].cantidad--;
@@ -2079,7 +2265,7 @@
                     html += `
                     <tr>
                         <td style="padding: 15px;">${horaStr}</td>
-                        <td style="font-weight: bold; color: #28a745; padding: 15px;">${v.total}</td>
+                        <td style="font-weight: bold; color: #28a745; padding: 15px;">$${Number(v.total).toLocaleString('es-AR')}</td>
                         <td style="text-align: center; padding: 15px;">
                             <div style="display: flex; gap: 5px; justify-content: center;">
                                 <button class="btn-accion" style="background: var(--primario); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer;" onclick="verDetalleVenta('${detalleEscapado}', ${v.total})">Detalles</button>
@@ -2092,7 +2278,7 @@
             }
 
             tbody.innerHTML = html;
-            document.getElementById('totalDiaHistorial').textContent = '$' + totalDelDia;
+            document.getElementById('totalDiaHistorial').textContent = '$' + totalDelDia.toLocaleString('es-AR');
         }
 
         window.verDetalleVenta = async function (detalleString, totalVenta) {
@@ -2107,47 +2293,72 @@
                 for (const item of detalle) {
                     const sub = item.precio * item.cantidad;
                     let imgUrl = item.imagen;
+                    let img = '';
+                    const esPago = item.id && String(item.id).startsWith('pago-');
 
-                    // Fetch dynamically if missing (for old history)
-                    if (!imgUrl) {
-                        const { data } = await supabaseClient.from('productos').select('Imagen').eq('id', item.id).single();
-                        if (data && data.Imagen) {
-                            imgUrl = data.Imagen;
+                    if (esPago) {
+                        img = '<div style="width:50px;height:50px;display:flex;align-items:center;justify-content:center;font-size:24px;">💵</div>';
+                    } else {
+                        // Fetch dynamically if missing (for old history)
+                        if (!imgUrl && item.id) {
+                            const { data } = await supabaseClient.from('productos').select('Imagen').eq('id', item.id).single();
+                            if (data && data.Imagen) {
+                                imgUrl = data.Imagen;
+                            }
                         }
+                        img = imgUrl ? `<img src="${imgUrl}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;border:1px solid #ccc;">` : '<div style="width:50px;height:50px;background:#eee;border-radius:8px;"></div>';
                     }
-
-                    const img = imgUrl ? `<img src="${imgUrl}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;border:1px solid #ccc;">` : '<div style="width:50px;height:50px;background:#eee;border-radius:8px;"></div>';
 
                     html += `
                         <tr>
                             <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${img}</td>
                             <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.nombre}</td>
                             <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.cantidad}</td>
-                            <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">$${sub}</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">$${Number(sub).toLocaleString('es-AR')}</td>
                         </tr>
                     `;
                 }
 
                 tbody.innerHTML = html;
-                document.getElementById('totalDetalleVenta').textContent = '$' + totalVenta;
+                document.getElementById('totalDetalleVenta').textContent = '$' + Number(totalVenta).toLocaleString('es-AR');
             } catch (e) {
                 console.error("Error al mostrar detalles", e);
                 alert("Error al mostrar el detalle de esta venta.");
             }
         }
 
-        window.eliminarVenta = async function(idVenta, detalleString) {
+        window.eliminarVenta = async function (idVenta, detalleString) {
             if (!confirm('¿Estás seguro de eliminar esta venta? El stock será devuelto y la venta desaparecerá del historial.')) return;
 
             try {
                 const detalle = JSON.parse(detalleString);
-                
-                // Restore stock
+
+                // Restore stock or revert payment
                 for (const item of detalle) {
-                    const { data: prod } = await supabaseClient.from('productos').select('stock').eq('id', item.id).single();
-                    if (prod) {
-                        const nuevoStock = (prod.stock || 0) + item.cantidad;
-                        await supabaseClient.from('productos').update({ stock: nuevoStock }).eq('id', item.id);
+                    if (item.id && String(item.id).startsWith('pago-')) {
+                        // Si es un pago, restauramos la deuda al cliente
+                        if (item.cliente_id) {
+                            const { data: cli } = await supabaseClient.from('clientes').select('saldo_actual').eq('id', item.cliente_id).single();
+                            if (cli) {
+                                const deudaRestaurada = (parseFloat(cli.saldo_actual) || 0) + parseFloat(item.precio);
+                                await supabaseClient.from('clientes').update({ saldo_actual: deudaRestaurada }).eq('id', item.cliente_id);
+
+                                // También registramos un cargo en el historial del cliente para que quede constancia
+                                await supabaseClient.from('movimientos_deuda').insert([{
+                                    cliente_id: item.cliente_id,
+                                    tipo: 'cargo',
+                                    monto: item.precio,
+                                    detalle: 'Anulación de pago (Eliminado de Historial de Ventas)'
+                                }]);
+                            }
+                        }
+                    } else {
+                        // Es un producto normal, restauramos stock
+                        const { data: prod } = await supabaseClient.from('productos').select('stock').eq('id', item.id).single();
+                        if (prod && prod.stock !== null) {
+                            const nuevoStock = (prod.stock || 0) + item.cantidad;
+                            await supabaseClient.from('productos').update({ stock: nuevoStock }).eq('id', item.id);
+                        }
                     }
                 }
 
@@ -2164,7 +2375,7 @@
                     cargarListaCaja();
                 }
 
-            } catch(e) {
+            } catch (e) {
                 console.error("Error al eliminar venta", e);
                 alert("Error al eliminar la venta.");
             }
@@ -2174,7 +2385,8 @@
             document.getElementById('modalDetalleVenta').style.display = 'none';
         }
 
-    
+
     </script>
 </body>
+
 </html>
