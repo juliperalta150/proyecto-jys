@@ -138,6 +138,17 @@
                             <option value="Transferencia">Transferencia</option>
                             <option value="Mixta">Mixta (Varios métodos)</option>
                         </select>
+                        <select id="pagoDestinoTransferencia" class="input-estandar"
+                            style="margin-bottom: 10px; display: none;" onchange="toggleDetallePagoCliente()">
+                            <option value="" disabled selected>Seleccione destinatario...</option>
+                            <option value="Julián">Julián</option>
+                            <option value="Patricia">Patricia</option>
+                            <option value="Marcelo">Marcelo</option>
+                            <option value="Sofía">Sofía</option>
+                            <option value="Diego">Diego</option>
+                            <option value="Javier">Javier</option>
+                            <option value="Otras">Otras...</option>
+                        </select>
                         <input type="text" id="pagoMetodoDetalle" class="input-estandar"
                             placeholder="Ej: 10.000 efvo y 5.000 transf..." style="display: none; margin-bottom: 10px;">
                     </div>
@@ -548,6 +559,8 @@
                             <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: center; width: 60px;">
                                 Foto</th>
                             <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: left;">Producto</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: center;">Medio de Pago
+                            </th>
                             <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: center;">Cantidad</th>
                             <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: right;">Subtotal</th>
                         </tr>
@@ -557,8 +570,30 @@
                 </table>
             </div>
             <div
-                style="text-align: right; font-size: 22px; font-weight: bold; margin-top: 15px; color: #28a745; border-top: 2px solid #eee; padding-top: 10px;">
-                Total: <span id="totalDetalleVenta">$0</span>
+                style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 2px solid #eee; padding-top: 10px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;"
+                    id="contenedorEdicionMetodoPago">
+                    <label style="font-weight: bold; color: #666; font-size: 16px;">Medio de pago:</label>
+                    <select id="detalleVentaMetodoPago" class="input-estandar"
+                        style="width: auto; padding: 5px; margin: 0; font-size: 14px;"
+                        onchange="toggleDetallePagoEdicion()">
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Débito">Débito</option>
+                        <option value="Crédito">Crédito</option>
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Mixta">Mixta</option>
+                    </select>
+                    <input type="text" id="detalleVentaMetodoComentario" class="input-estandar"
+                        placeholder="Ej: 10.000 efvo y 5.000 transf..."
+                        style="width: 250px; padding: 5px; margin: 0; font-size: 14px; display: none;">
+                    <button type="button" class="btn-accion"
+                        style="background: var(--primario); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold;"
+                        onclick="actualizarMetodoPagoVenta()">💾 Guardar</button>
+                    <input type="hidden" id="detalleVentaIdVenta" value="">
+                </div>
+                <div style="text-align: right; font-size: 22px; font-weight: bold; color: #28a745;">
+                    Total: <span id="totalDetalleVenta">$0</span>
+                </div>
             </div>
             <div style="text-align: center; margin-top: 25px;">
                 <button type="button" class="boton-foto" style="background: #6c757d; width: 200px;"
@@ -802,6 +837,18 @@
                             <option value="Transferencia">Transferencia</option>
                             <option value="Mixta">Mixta (Varios métodos)</option>
                         </select>
+                        <select id="ventaDestinoTransferencia" class="input-estandar"
+                            style="font-size: 16px; padding: 10px; margin-top: 10px; display: none;"
+                            onchange="toggleDetallePago()">
+                            <option value="" disabled selected>Seleccione destinatario...</option>
+                            <option value="Julián">Julián</option>
+                            <option value="Patricia">Patricia</option>
+                            <option value="Marcelo">Marcelo</option>
+                            <option value="Sofía">Sofía</option>
+                            <option value="Diego">Diego</option>
+                            <option value="Javier">Javier</option>
+                            <option value="Otras">Otras...</option>
+                        </select>
                         <input type="text" id="ventaDetallePago" class="input-estandar"
                             placeholder="Ej: 10.000 efvo y 5.000 transf..."
                             style="margin-top: 10px; font-size: 15px; display: none;">
@@ -826,9 +873,14 @@
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="margin: 0; font-size: 28px;">📅 Historial de Ventas</h2>
-                    <button class="btn-accion"
-                        style="background: #17a2b8; color: white; padding: 10px 15px; border-radius: 8px; border: none; cursor: pointer; font-size: 16px;"
-                        onclick="cargarHistorialVentas()">🔄 Actualizar</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-accion"
+                            style="background: #ffc107; color: #333; padding: 10px 15px; border-radius: 8px; border: none; cursor: pointer; font-size: 16px; font-weight: bold;"
+                            onclick="mostrarResumenCaja()">📊 Resumen de caja</button>
+                        <button class="btn-accion"
+                            style="background: #17a2b8; color: white; padding: 10px 15px; border-radius: 8px; border: none; cursor: pointer; font-size: 16px;"
+                            onclick="cargarHistorialVentas()">🔄 Actualizar</button>
+                    </div>
                 </div>
 
                 <div
@@ -866,6 +918,24 @@
             </div>
         </div> <!-- FIN TAB VENTAS -->
 
+    </div>
+
+    <!-- MODAL RESUMEN DE CAJA -->
+    <div class="modal-overlay" id="modalResumenCaja">
+        <div class="modal-content" style="max-width: 350px;">
+            <div class="modal-header">
+                <h2 style="margin:0; color: var(--primario);">📊 Resumen de Caja</h2>
+                <span class="close-btn"
+                    onclick="document.getElementById('modalResumenCaja').style.display='none'">&times;</span>
+            </div>
+            <div id="contenidoResumenCaja" style="margin-top: 15px; font-size: 16px; color: #333; line-height: 1.8;">
+                <!-- Aquí va el resumen -->
+            </div>
+            <div style="margin-top: 20px;">
+                <button type="button" class="boton-foto" style="background: var(--primario);"
+                    onclick="document.getElementById('modalResumenCaja').style.display='none'">Cerrar</button>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL DE REVISIÓN -->
@@ -1993,14 +2063,25 @@
 
         window.toggleDetallePagoCliente = function () {
             const metodo = document.getElementById('pagoMetodo').value;
+            const selectDestino = document.getElementById('pagoDestinoTransferencia');
             const detalle = document.getElementById('pagoMetodoDetalle');
-            if (metodo === 'Mixta' || metodo === 'Transferencia') {
+
+            if (metodo === 'Transferencia') {
+                selectDestino.style.display = 'block';
+                selectDestino.setAttribute('required', 'true');
+            } else {
+                selectDestino.style.display = 'none';
+                selectDestino.removeAttribute('required');
+                selectDestino.value = '';
+            }
+
+            if (metodo === 'Mixta' || (metodo === 'Transferencia' && selectDestino.value === 'Otras')) {
                 detalle.style.display = 'block';
                 detalle.setAttribute('required', 'true');
-                if (metodo === 'Transferencia') {
-                    detalle.placeholder = 'Ej: Alias jorge.pagos...';
-                } else {
+                if (metodo === 'Mixta') {
                     detalle.placeholder = 'Ej: 10.000 efvo y 5.000 transf...';
+                } else {
+                    detalle.placeholder = 'Aclarar a quién se hizo la transferencia...';
                 }
             } else {
                 detalle.style.display = 'none';
@@ -2026,12 +2107,31 @@
             let detalle = document.getElementById('pagoDetalle').value || 'Pago a cuenta';
 
             const metodoSelect = document.getElementById('pagoMetodo').value;
+            const destinoT = document.getElementById('pagoDestinoTransferencia').value;
+            const detalleInput = document.getElementById('pagoMetodoDetalle').value.trim();
+
             let metodoFinal = metodoSelect;
-            if (metodoSelect === 'Mixta' || metodoSelect === 'Transferencia') {
-                const detalleInput = document.getElementById('pagoMetodoDetalle').value.trim();
-                if (detalleInput) {
-                    metodoFinal = `${metodoSelect}: ${detalleInput}`;
+
+            if (metodoSelect === 'Transferencia') {
+                if (!destinoT) {
+                    alert('Debe seleccionar a quién se realiza la transferencia.');
+                    return;
                 }
+                if (destinoT === 'Otras') {
+                    if (!detalleInput) {
+                        alert('Debe aclarar a quién se realiza la transferencia.');
+                        return;
+                    }
+                    metodoFinal = `Transferencia - Otras: ${detalleInput}`;
+                } else {
+                    metodoFinal = `Transferencia - ${destinoT}`;
+                }
+            } else if (metodoSelect === 'Mixta') {
+                if (!detalleInput) {
+                    alert('Debe aclarar los detalles del pago mixto.');
+                    return;
+                }
+                metodoFinal = `Mixta: ${detalleInput}`;
             }
 
             const nuevoSaldoPrevisto = saldoTotal - monto;
@@ -2345,6 +2445,24 @@
         window.confirmarVenta = async function () {
             if (carritoCaja.length === 0) return;
 
+            const metodo = document.getElementById('ventaMetodoPago').value;
+            const destinoT = document.getElementById('ventaDestinoTransferencia').value;
+            const detalle = document.getElementById('ventaDetallePago').value.trim();
+
+            if (metodo === 'Transferencia') {
+                if (!destinoT) {
+                    alert('Debe seleccionar a quién se realiza la transferencia.');
+                    return;
+                }
+                if (destinoT === 'Otras' && !detalle) {
+                    alert('Debe aclarar a quién se realiza la transferencia.');
+                    return;
+                }
+            } else if (metodo === 'Mixta' && !detalle) {
+                alert('Debe aclarar los detalles del pago mixto.');
+                return;
+            }
+
             let totalVenta = 0;
             carritoCaja.forEach(item => totalVenta += item.precio * item.cantidad);
 
@@ -2354,18 +2472,25 @@
 
         window.toggleDetallePago = function () {
             const metodo = document.getElementById('ventaMetodoPago').value;
+            const selectDestino = document.getElementById('ventaDestinoTransferencia');
             const detalle = document.getElementById('ventaDetallePago');
-            if (metodo === 'Mixta' || metodo === 'Transferencia') {
+
+            if (metodo === 'Transferencia') {
+                selectDestino.style.display = 'block';
+            } else {
+                selectDestino.style.display = 'none';
+                selectDestino.value = '';
+            }
+
+            if (metodo === 'Mixta' || (metodo === 'Transferencia' && selectDestino.value === 'Otras')) {
                 detalle.style.display = 'block';
-                detalle.setAttribute('required', 'true');
-                if (metodo === 'Transferencia') {
-                    detalle.placeholder = 'Ej: Alias jorge.pagos...';
-                } else {
+                if (metodo === 'Mixta') {
                     detalle.placeholder = 'Ej: 10.000 efvo y 5.000 transf...';
+                } else {
+                    detalle.placeholder = 'Aclarar a quién se hizo la transferencia...';
                 }
             } else {
                 detalle.style.display = 'none';
-                detalle.removeAttribute('required');
                 detalle.value = '';
             }
         }
@@ -2381,12 +2506,18 @@
             carritoCaja.forEach(item => totalVenta += item.precio * item.cantidad);
 
             const metodoSelect = document.getElementById('ventaMetodoPago').value;
+            const destinoT = document.getElementById('ventaDestinoTransferencia').value;
+            const detalleInput = document.getElementById('ventaDetallePago').value.trim();
             let metodoFinal = metodoSelect;
-            if (metodoSelect === 'Mixta' || metodoSelect === 'Transferencia') {
-                const detalleInput = document.getElementById('ventaDetallePago').value.trim();
-                if (detalleInput) {
-                    metodoFinal = `${metodoSelect}: ${detalleInput}`;
+
+            if (metodoSelect === 'Transferencia') {
+                if (destinoT === 'Otras') {
+                    metodoFinal = `Transferencia - Otras: ${detalleInput}`;
+                } else {
+                    metodoFinal = `Transferencia - ${destinoT}`;
                 }
+            } else if (metodoSelect === 'Mixta' && detalleInput) {
+                metodoFinal = `Mixta: ${detalleInput}`;
             }
 
             try {
@@ -2438,6 +2569,54 @@
 
         // ==================== 7. HISTORIAL DE VENTAS ====================
         let fechaActualFiltro = new Date();
+        let ventasDelDiaParaResumen = [];
+
+        window.mostrarResumenCaja = function () {
+            if (!ventasDelDiaParaResumen || ventasDelDiaParaResumen.length === 0) {
+                alert('No hay ventas en este día para resumir.');
+                return;
+            }
+
+            let resumen = {
+                'Efectivo': 0,
+                'Transferencia': 0,
+                'Débito': 0,
+                'Crédito': 0,
+                'Mixta': 0
+            };
+
+            let totalGeneral = 0;
+
+            ventasDelDiaParaResumen.forEach(v => {
+                const metodo = v.metodo_pago || 'Efectivo';
+                const monto = parseFloat(v.total) || 0;
+
+                if (resumen[metodo] !== undefined) {
+                    resumen[metodo] += monto;
+                } else {
+                    resumen[metodo] = (resumen[metodo] || 0) + monto;
+                }
+                totalGeneral += monto;
+            });
+
+            let html = '<ul style="list-style: none; padding: 0; margin: 0;">';
+            for (const [metodo, total] of Object.entries(resumen)) {
+                if (total > 0) {
+                    html += `<li style="display: flex; justify-content: space-between; border-bottom: 1px dashed #ddd; padding: 8px 0;">
+                        <span>${metodo}</span>
+                        <strong>$${total.toLocaleString('es-AR')}</strong>
+                    </li>`;
+                }
+            }
+            html += `</ul>
+            <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; margin-top: 15px; color: #28a745;">
+                <span>TOTAL</span>
+                <span>$${totalGeneral.toLocaleString('es-AR')}</span>
+            </div>`;
+
+            document.getElementById('contenidoResumenCaja').innerHTML = html;
+            document.getElementById('modalResumenCaja').style.display = 'flex';
+        }
 
         window.cambiarFechaFiltro = function (dias) {
             fechaActualFiltro.setDate(fechaActualFiltro.getDate() + dias);
@@ -2484,6 +2663,8 @@
                 return;
             }
 
+            ventasDelDiaParaResumen = ventas || [];
+
             // Consultar si hay ventas más antiguas para deshabilitar botón Atrás
             const { count: ventasViejas } = await supabaseClient
                 .from('ventas')
@@ -2515,7 +2696,7 @@
 
                     let badgeRevision = v.revision_pendiente ? `<br><span style="color: #856404; background: #fff3cd; padding: 3px 6px; font-size: 12px; border-radius: 4px; display: inline-block; margin-top: 5px; border: 1px solid #ffeeba;">⚠️ Revisión: ${v.comentario_revision || 'Sin comentarios'}</span>` : '';
 
-                    let botones = `<button class="btn-accion" style="background: var(--primario); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer;" onclick="verDetalleVenta('${detalleEscapado}', ${v.total})">Detalles</button>`;
+                    let botones = `<button class="btn-accion" style="background: var(--primario); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer;" onclick="verDetalleVenta('${detalleEscapado}', ${v.total}, '${v.id}', '${v.metodo_pago || ''}')">Detalles</button>`;
 
                     if (currentUserEmail === 'venta@jys.com') {
                         if (!v.revision_pendiente) {
@@ -2551,13 +2732,42 @@
             document.getElementById('totalDiaHistorial').textContent = '$' + totalDelDia.toLocaleString('es-AR');
         }
 
-        window.verDetalleVenta = async function (detalleString, totalVenta) {
+        window.verDetalleVenta = async function (detalleString, totalVenta, idVenta, metodoPago) {
             try {
                 const detalle = JSON.parse(detalleString);
                 const tbody = document.getElementById('listaDetalleVenta');
 
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Cargando detalles...</td></tr>';
                 document.getElementById('modalDetalleVenta').style.display = 'flex';
+
+                if (idVenta) {
+                    document.getElementById('detalleVentaIdVenta').value = idVenta;
+
+                    let baseMethod = metodoPago || 'Efectivo';
+                    let comment = '';
+                    if (metodoPago && metodoPago.includes(': ')) {
+                        const parts = metodoPago.split(': ');
+                        baseMethod = parts[0];
+                        comment = parts.slice(1).join(': ');
+                    }
+
+                    const selectEl = document.getElementById('detalleVentaMetodoPago');
+                    let validOption = Array.from(selectEl.options).some(opt => opt.value === baseMethod);
+                    selectEl.value = validOption ? baseMethod : 'Efectivo';
+
+                    document.getElementById('detalleVentaMetodoComentario').value = comment;
+
+                    const esAdmin = (typeof currentUserEmail !== 'undefined' && currentUserEmail === 'admin@jys.com');
+                    if (esAdmin) {
+                        document.getElementById('contenedorEdicionMetodoPago').style.display = 'flex';
+                        if (typeof toggleDetallePagoEdicion === 'function') toggleDetallePagoEdicion();
+                    } else {
+                        document.getElementById('contenedorEdicionMetodoPago').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('detalleVentaIdVenta').value = '';
+                    document.getElementById('contenedorEdicionMetodoPago').style.display = 'none';
+                }
 
                 let html = '';
                 for (const item of detalle) {
@@ -2583,6 +2793,7 @@
                         <tr>
                             <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${img}</td>
                             <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.nombre}</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${metodoPago || '-'}</td>
                             <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.cantidad}</td>
                             <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">$${Number(sub).toLocaleString('es-AR')}</td>
                         </tr>
@@ -2596,6 +2807,51 @@
                 alert("Error al mostrar el detalle de esta venta.");
             }
         }
+
+        window.toggleDetallePagoEdicion = function () {
+            const metodo = document.getElementById('detalleVentaMetodoPago').value;
+            const detalle = document.getElementById('detalleVentaMetodoComentario');
+            if (metodo === 'Mixta' || metodo === 'Transferencia') {
+                detalle.style.display = 'block';
+            } else {
+                detalle.style.display = 'none';
+            }
+        };
+
+        window.actualizarMetodoPagoVenta = async function () {
+            if (typeof currentUserEmail !== 'undefined' && currentUserEmail !== 'admin@jys.com') return;
+            const idVenta = document.getElementById('detalleVentaIdVenta').value;
+            const metodoBase = document.getElementById('detalleVentaMetodoPago').value;
+            const comentario = document.getElementById('detalleVentaMetodoComentario').value.trim();
+
+            if (!idVenta) return;
+
+            let nuevoMetodo = metodoBase;
+            if ((metodoBase === 'Mixta' || metodoBase === 'Transferencia') && comentario) {
+                nuevoMetodo = `${metodoBase}: ${comentario}`;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('ventas')
+                    .update({ metodo_pago: nuevoMetodo })
+                    .eq('id', idVenta);
+
+                if (error) throw error;
+
+                // Mostrar feedback visual
+                const selectEl = document.getElementById('detalleVentaMetodoPago');
+                const bgOriginal = selectEl.style.background;
+                selectEl.style.background = '#d4edda';
+                setTimeout(() => { selectEl.style.background = bgOriginal; }, 1000);
+
+                // Actualizar la lista en el fondo
+                cargarHistorialVentas();
+            } catch (e) {
+                console.error("Error al actualizar método de pago", e);
+                alert("Error al actualizar el método de pago.");
+            }
+        };
 
         window.eliminarVenta = async function (idVenta, detalleString) {
             if (!confirm('¿Estás seguro de eliminar esta venta? El stock será devuelto y la venta desaparecerá del historial.')) return;
